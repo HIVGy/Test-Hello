@@ -1,112 +1,74 @@
 <template>
-  <v-container>
-    <v-sheet
-      class="pt-12 mt-12 text-center mx-auto"
-      width="50%"
-      elevation="4"
-      rounded
-    >
-      <v-form @submit.prevent="submit" ref="formUser" class="mx-4">
+  <v-container class="pt-12 mt-12" background-color="teal-lighten-3">
+    <v-sheet class="pt-12 mt-12 mx-auto" width="50%" elevation="4" rounded>
+      <v-form
+        @submit.prevent="login"
+        ref="formUser"
+        id="userForm"
+        class="mx-12"
+      >
         <input type="hidden" name="_token" :value="csrf" />
-
-        <h1 class="text-h6 mb-6">Inicia sesión</h1>
+        <h1 class="text-h6 my-6 text-center" color="info">Inicia sesión</h1>
         <v-text-field
           v-model="usuario.email"
+          class="mb-4"
           prepend-inner-icon="mdi-account"
           label="Correo electrónico"
           placeholder="john@gmail.com"
-          type="email"
+          color="secondary"
           :rules="[reglas.requerido, reglas.email]"
         />
         <v-text-field
           v-model="usuario.password"
+          class="mb-4"
           prepend-inner-icon="mdi-shield-lock"
-          :append-inner-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="show1 ? 'text' : 'password'"
+          :append-inner-icon="mostrarPass ? 'mdi-eye' : 'mdi-eye-off'"
+          @click:append-inner="mostrarPass = !mostrarPass"
+          :type="mostrarPass ? 'text' : 'password'"
           label="Contraseña"
           placeholder="Escribe tu contraseña"
-          @click:append-inner="show1 = !show1"
+          color="secondary"
           :rules="[reglas.requerido]"
         />
-        <v-btn
-          type="submit"
-          form="userForm"
-          color="primary"
-          class="text-white mb-4"
-        >
-          Iniciar sesión
-        </v-btn>
+        <div class="text-center text-white pb-12">
+          <v-btn type="submit" form="userForm" color="primary">
+            Iniciar sesión
+          </v-btn>
+        </div>
       </v-form>
     </v-sheet>
 
-    <!--Dialog de mensajes de confirmación o error-->
-    <template>
-      <v-dialog v-model="dialogRespuesta" persistent width="300">
-        <v-card>
-          <template v-if="exito">
-            <div class="pt-6 text-center">
-              <v-avatar color="green" size="64">
-                <v-icon color="white" x-large class="mdi-48px">
-                  mdi-check-bold
-                </v-icon>
-              </v-avatar>
-            </div>
-            <div class="text-center pt-3">
-              <v-card-text class="text-center text-h4 font-weight-bold">
-                Exito
-              </v-card-text>
-            </div>
-          </template>
-          <template v-else>
-            <div class="pt-6 text-center">
-              <v-avatar color="warning" size="64">
-                <v-icon color="white" x-large class="mdi-48px">
-                  mdi-alert
-                </v-icon>
-              </v-avatar>
-            </div>
-            <div class="text-center pt-3">
-              <v-card-text class="text-center text-h4 font-weight-bold">
-                Oh no
-              </v-card-text>
-            </div>
-          </template>
-          <v-card-subtitle class="pt-2 text-h6 text-center">
-            {{ respuesta.message }}
-          </v-card-subtitle>
-          <div class="pb-2 text-center">
-            <v-btn
-              outlined
-              large
-              plain
-              color="primary"
-              text
-              @click="confirmar()"
-            >
-              Aceptar
-            </v-btn>
-          </div>
-        </v-card>
-      </v-dialog>
-    </template>
+    <cargando-component :visible="estaCargando"></cargando-component>
 
-    <cargando :visible="true"></cargando>
+    <respuestas-component
+      :visible="respondiendo"
+      :exito="exito"
+      :respuesta="respuesta"
+      @reset="reset"
+    ></respuestas-component>
   </v-container>
 </template>
 
 <script>
 import cargando from "../components/cargandoComponent.vue";
+import respuestas from "../components/respuestasComponent.vue";
 
 export default {
   name: "login",
   components: {
-    cargando: cargando,
+    'cargando-component': cargando,
+    "respuestas-component": respuestas,
   },
   data() {
     return {
       csrf: document
         .querySelector("meta[name='csrf-token']")
         .getAttribute("content"),
+      mostrarPass: false,
+      respondiendo: false,
+      estaCargando: false,
+      exito: false,
+      respuesta: '',
       usuario: {},
       reglas: {
         requerido: (v) => !!v || "Campo requerido",
@@ -118,28 +80,29 @@ export default {
     };
   },
   methods: {
-    validar() {
-      if (this.$refs.formUser.validate()) {
-        return true;
+    async login() {
+      this.estaCargando = true;
+      const { valid } = await this.$refs.formUser.validate();
+      if (valid) {
+        axios.post("/login", this.usuario).then((response) => {
+          if (response.data.success) {
+            window.location.href = "/";
+          } else {
+            this.asignarRespuesta(response.data.success, response.data.message);
+          }
+        });
       }
-      return false;
     },
-    submit: function () {
-      this.dialogLoading = true;
-      if (this.validar()) {
-        axios
-          .post("/login", this.usuario)
-          .then((response) => {
-            if (response.status == 204) {
-              //usuario identificado
-            } else {
-              //usuario invalido
-            }
-          })
-          .catch((error) => {
-            //error de validacion
-          });
-      }
+    asignarRespuesta(exito, respuesta){
+      this.estaCargando = false;
+      this.respondiendo = true;
+      this.exito = exito;
+      this.respuesta = respuesta;
+    },
+    reset(){
+      this.respondiendo = false;
+      this.exito = false;
+      this.respuesta = '';
     },
   },
 };

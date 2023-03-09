@@ -17,7 +17,11 @@
 
 <body>
     <div id="app">
-        <login />
+        @auth
+            <home nombre="{{ auth()->user()->name }}"></home>
+        @else
+            <login />
+        @endauth
     </div>
 </body>
 
