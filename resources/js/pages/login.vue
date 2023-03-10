@@ -56,7 +56,7 @@ import respuestas from "../components/respuestasComponent.vue";
 export default {
   name: "login",
   components: {
-    'cargando-component': cargando,
+    "cargando-component": cargando,
     "respuestas-component": respuestas,
   },
   data() {
@@ -68,7 +68,7 @@ export default {
       respondiendo: false,
       estaCargando: false,
       exito: false,
-      respuesta: '',
+      respuesta: "",
       usuario: {},
       reglas: {
         requerido: (v) => !!v || "Campo requerido",
@@ -91,18 +91,20 @@ export default {
             this.asignarRespuesta(response.data.success, response.data.message);
           }
         });
+      } else {
+        this.estaCargando = false;
       }
     },
-    asignarRespuesta(exito, respuesta){
+    asignarRespuesta(exito, respuesta) {
       this.estaCargando = false;
       this.respondiendo = true;
       this.exito = exito;
       this.respuesta = respuesta;
     },
-    reset(){
+    reset() {
       this.respondiendo = false;
       this.exito = false;
-      this.respuesta = '';
+      this.respuesta = "";
     },
   },
 };
