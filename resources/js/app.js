@@ -9,7 +9,7 @@ import colors from 'vuetify/lib/util/colors'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
-//Importar componentes
+//Importar componentes globales
 import login from './pages/login.vue';
 import home from './pages/home.vue';
 
@@ -17,6 +17,7 @@ import home from './pages/home.vue';
 const vuetify = createVuetify({
   components,
   directives,
+  //Configuración de un tema por defecto con los colores de la página
   theme: {
     themes: {
       light: {

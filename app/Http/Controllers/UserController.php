@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    /**
+     * Verifica la información del usuario y lo autentifica
+     * si su información es correcta
+     */
     public function authenticate(Request $request)
     {
         $datos_formulario = $request->validate([
@@ -29,6 +33,11 @@ class UserController extends Controller
         return response()->json($response, 200);
     }
 
+    /**
+     * Cierra la sesión actual y tambien invalida la sesión
+     * actual para volver a generarla una vez el usuario
+     * inicie sesión nuevamente
+     */
     public function logout(Request $request)
     {
         auth()->logout();

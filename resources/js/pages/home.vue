@@ -37,6 +37,13 @@
     <!-- Ventana flotante de registro/edición -->
     <v-dialog v-model="registrando" width="40%">
       <v-card class="elevation-0 text-center" color="white">
+        <h1 class="text-h6 my-6 text-center" v-if="editando">
+          Editando una materia
+        </h1>
+        <h1 class="text-h6 my-6 text-center" v-else>
+          Ingresa una nueva materia
+        </h1>
+        <!-- Formulario y campos de registro -->
         <v-form
           @submit.prevent="guardar"
           ref="formMat"
@@ -44,12 +51,6 @@
           class="mx-6"
         >
           <input type="hidden" name="_token" :value="csrf" />
-          <h1 class="text-h6 my-6 text-center" v-if="editando">
-            Editando una materia
-          </h1>
-          <h1 class="text-h6 my-6 text-center" v-else>
-            Ingresa una nueva materia
-          </h1>
           <v-text-field
             v-model="materiaFormulario.nombre"
             class="mb-2"
@@ -110,8 +111,10 @@
       </v-sheet>
     </v-dialog>
 
+    <!-- Ventana flotante de simbolo de carga -->
     <cargando-component :visible="estaCargando"></cargando-component>
 
+    <!-- Ventana flotante con alerta con mensajes de respuesta -->
     <respuestas-component
       :visible="respondiendo"
       :exito="exito"
@@ -137,7 +140,6 @@ export default {
     "materias-component": materias,
   },
   mounted() {
-    this.estaCargando = true;
     this.obtenerMaterias();
   },
   data() {
@@ -145,13 +147,16 @@ export default {
       csrf: document
         .querySelector("meta[name='csrf-token']")
         .getAttribute("content"),
+      //Variables para controlar la visiblidad de los apartados de la página
       respondiendo: false,
       estaCargando: false,
       registrando: false,
       editando: false,
       eliminando: false,
+      //Variables para asignar valores al componente de respuestas
       exito: false,
       respuesta: "",
+      // Variables para controlar el formulario de registro y actualización de materias
       materiaFormulario: {},
       materias: [],
       reglas: {
@@ -171,36 +176,26 @@ export default {
   },
   methods: {
     obtenerMaterias() {
+      this.estaCargando = true;
       axios.get("/materias").then((response) => {
         this.materias = response.data;
         this.estaCargando = false;
       });
     },
+    /* Funciones para crear, editar y eliminar las materias */
     async guardar() {
       this.estaCargando = true;
       const { valid } = await this.$refs.formMat.validate();
       if (valid) {
         if (this.editando) {
           axios.put("/materia", this.materiaFormulario).then((response) => {
-            if (response.data.success) {
-              window.location.href = "/";
-            } else {
-              this.asignarRespuesta(
-                response.data.success,
-                response.data.message
-              );
-            }
+            this.registrando = false;
+            this.asignarRespuesta(response.data.success, response.data.message);
           });
         } else {
           axios.post("/materia", this.materiaFormulario).then((response) => {
-            if (response.data.success) {
-              window.location.href = "/";
-            } else {
-              this.asignarRespuesta(
-                response.data.success,
-                response.data.message
-              );
-            }
+            this.registrando = false;
+            this.asignarRespuesta(response.data.success, response.data.message);
           });
         }
       } else {
@@ -211,16 +206,11 @@ export default {
       axios
         .delete("/materia", { data: this.materiaFormulario })
         .then((response) => {
-          if (response.data.success) {
-            window.location.href = "/";
-          } else {
-            this.asignarRespuesta(response.data.success, response.data.message);
-          }
-        })
-        .catch((error) => {
-          console.log(error.response.data.trace);
+          this.eliminando = false;
+          this.asignarRespuesta(response.data.success, response.data.message);
         });
     },
+    /* Funciones para abrir las ventanas flotantes y asignar los valores de las materias */
     registrar() {
       this.materiaFormulario = {};
       this.editando = false;
@@ -245,6 +235,7 @@ export default {
         }
       });
     },
+    /* Funciones para controlar el componente de respuestas */
     asignarRespuesta(exito, respuesta) {
       this.estaCargando = false;
       this.respondiendo = true;

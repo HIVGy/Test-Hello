@@ -17,6 +17,7 @@
 
 <body>
     <div id="app">
+        <!-- Separa las dos páginas por la autentificación del usuario -->
         @auth
             <home nombre="{{ auth()->user()->name }}"></home>
         @else

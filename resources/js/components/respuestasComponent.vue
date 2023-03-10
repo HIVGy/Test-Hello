@@ -43,7 +43,11 @@ export default {
   methods: {
     reset() {
       this.dRespuesta = false;
-      this.$emit('reset', false);
+      if (this.exito) {
+        window.location.href = "/";
+      } else {
+        this.$emit("reset", false);
+      }
     },
   },
 };

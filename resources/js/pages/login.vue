@@ -1,6 +1,7 @@
 <template>
   <v-container class="pt-12 mt-12" background-color="teal-lighten-3">
-    <v-sheet class="pt-12 mt-12 mx-auto" width="50%" elevation="4" rounded>
+    <!-- Formulario de inicio de sesión -->
+    <v-sheet class="pt-12 mt-12 mx-auto" width="50%" elevation="4">
       <v-form
         @submit.prevent="login"
         ref="formUser"
@@ -38,14 +39,17 @@
       </v-form>
     </v-sheet>
 
+    <!-- Ventana flotante de simbolo de carga -->
     <cargando-component :visible="estaCargando"></cargando-component>
 
+    <!-- Ventana flotante con alerta con mensajes de respuesta -->
     <respuestas-component
       :visible="respondiendo"
-      :exito="exito"
       :respuesta="respuesta"
+      :exito="exito"
       @reset="reset"
-    ></respuestas-component>
+    />
+
   </v-container>
 </template>
 
@@ -64,11 +68,14 @@ export default {
       csrf: document
         .querySelector("meta[name='csrf-token']")
         .getAttribute("content"),
+      //Variables para controlar la visiblidad de los apartados de la página
       mostrarPass: false,
       respondiendo: false,
       estaCargando: false,
+      //Variables para asignar valores al componente de respuestas
       exito: false,
       respuesta: "",
+      //Variables usadas por el formulario de inicio de sesión
       usuario: {},
       reglas: {
         requerido: (v) => !!v || "Campo requerido",
@@ -85,16 +92,14 @@ export default {
       const { valid } = await this.$refs.formUser.validate();
       if (valid) {
         axios.post("/login", this.usuario).then((response) => {
-          if (response.data.success) {
-            window.location.href = "/";
-          } else {
-            this.asignarRespuesta(response.data.success, response.data.message);
-          }
+          this.asignarRespuesta(response.data.success, response.data.message);
         });
       } else {
+        //Cierra la ventana flotante de cargando si hay un error en el formulario
         this.estaCargando = false;
       }
     },
+    /* Funciones para controlar el componente de respuestas */
     asignarRespuesta(exito, respuesta) {
       this.estaCargando = false;
       this.respondiendo = true;

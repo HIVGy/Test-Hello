@@ -10,12 +10,10 @@ Route::get('/', function () {
 });
 
 /* ---------------------------- Usuarios ---------------------------- */
-
 Route::post('/login', [UserController::class, 'authenticate']);
 Route::post('/logout', [UserController::class, 'logout']);
 
-Route::post('/test', [MateriasController::class, 'store']);
-
+/* ---------------------------- Usuarios ---------------------------- */
 Route::get('/materias', [MateriasController::class, 'list']);
 Route::post('/materia', [MateriasController::class, 'store']);
 Route::put('/materia', [MateriasController::class, 'update']);

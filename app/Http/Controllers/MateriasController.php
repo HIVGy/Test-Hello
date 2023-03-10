@@ -7,14 +7,18 @@ use Illuminate\Http\Request;
 
 class MateriasController extends Controller
 {
-    //Regresa los registros de las materias con paginación
+    /**
+     * Genera un array de objetos de Materia y lo regresa
+     */
     public function list()
     {
         $materias = Materias::latest()->get();
         return $materias;
     }
 
-    //Almacenar una nueva materia
+    /**
+     * Almacena un nuevo objeto de Materia en la base de datos
+     */
     public function store(Request $request)
     {
         $camposValidados = $request->validate([
@@ -41,7 +45,9 @@ class MateriasController extends Controller
         return response()->json($response, 200);
     }
 
-    //Editar una materia existente
+    /**
+     * Modifica y actualiza los datos de un objeto de Materia existente
+     */
     public function update(Request $request)
     {
         $camposValidados = $request->validate([
@@ -69,7 +75,9 @@ class MateriasController extends Controller
         return response()->json($response, 200);
     }
 
-    //Eliminar una materia
+    /**
+     * Elimina de la base de datos un objeto de Materia existente
+     */
     public function destroy(Request $request)
     {
         $materia = Materias::find($request->id);
